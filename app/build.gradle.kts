@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "limbuserendipity.smartcircle"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -36,6 +36,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -51,9 +52,23 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    packagingOptions {
+        exclude("META-INF/INDEX.LIST")
+        exclude("META-INF/io.netty.versions.properties")
+        exclude("META-INF/LICENSE")
+        exclude("META-INF/NOTICE")
+    }
+
 }
 
 dependencies {
+    implementation ("com.marsounjan:icmp4a:1.0.0")
+
+    implementation("io.ktor:ktor-server-core:2.3.7")
+    implementation("io.ktor:ktor-server-netty:2.3.7")
+    implementation("io.ktor:ktor-server-websockets:2.3.7")
+
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jmdns:jmdns:3.5.7")
