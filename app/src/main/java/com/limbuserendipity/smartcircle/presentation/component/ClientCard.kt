@@ -1,6 +1,5 @@
 package com.limbuserendipity.smartcircle.presentation.component
 
-import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,19 +11,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,8 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -76,9 +68,6 @@ fun ClientCardContent(
     massage : String,
     isConnect : Boolean,
 ){
-    val icon = if(isConnect) Icons.Default.Check else Icons.Default.Close
-    val tint = if(isConnect) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-
     Box(
         modifier = Modifier
             .width(250.dp)
@@ -94,22 +83,15 @@ fun ClientCardContent(
             modifier = Modifier.fillMaxSize()
         ) {
             Box {
-                Circle {
+                Circle(
+                    isConnect = isConnect
+                ) {
                     Text(
                         text = number,
                         fontWeight = FontWeight.Bold,
                         fontSize = 34.sp
                     )
                 }
-                Icon(
-                    imageVector = icon,
-                    tint = tint,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .size(34.dp)
-                        .offset(x = 28.dp, y = -10.dp)
-                )
             }
             32.dp.Space()
             Text(
