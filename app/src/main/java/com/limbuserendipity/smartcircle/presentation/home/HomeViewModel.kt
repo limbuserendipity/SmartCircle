@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.limbuserendipity.smartcircle.data.core.model.Arduino
 import com.limbuserendipity.smartcircle.data.core.model.ArduinoStatus
+import com.limbuserendipity.smartcircle.domain.server.AppServerCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -31,14 +32,11 @@ class HomeViewModel @Inject constructor(
 
 ) : ViewModel() {
 
-    val server = WebSocketServer()
+    val server = WebSocketServer(callback = setupServerCallbacks())
 
-    private val _state = MutableStateFlow(HomeState())
+    // may be use setter?
+    private var _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
-
-    init {
-        setupServerCallbacks()
-    }
 
     private inline fun updateState(transform: HomeState.() -> HomeState) {
         _state.update { it.transform() }
@@ -48,15 +46,14 @@ class HomeViewModel @Inject constructor(
         updateState { copy(arduinos = transform(arduinos)) }
     }
 
-    private fun setupServerCallbacks() {
-        server.apply {
-            onServerStarted = ::handleServerStarted
-            onServerStopped = ::handleServerStopped
-            onClientConnected = ::handleClientConnected
-            onClientDisconnected = ::handleClientDisconnected
-            onMessageReceived = ::handleMessageReceived
-        }
-    }
+    private fun setupServerCallbacks() = AppServerCallback(
+        onServerStarted = ::handleServerStarted,
+        onServerStopped = ::handleServerStopped,
+        onClientConnected = ::handleClientConnected,
+        onClientDisconnected = ::handleClientDisconnected,
+        onMessageReceived = ::handleMessageReceived,
+        onError = {}
+    )
 
     private fun handleServerStarted() {
         updateState { copy(serverStatus = ServerStatus.Running) }
@@ -116,9 +113,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun sendToClient(ip: String, message: String){
+    fun sendToClient(ip: String, message: String) {
         viewModelScope.launch {
-            server.sendToClient(ip,message)
+            server.sendToClient(ip, message)
         }
     }
 
@@ -177,7 +174,7 @@ class HomeViewModel @Inject constructor(
     fun searchIp() {
         viewModelScope.launch {
             Log.w("lolkek", "start search")
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 val jmDNS: JmDNS = JmDNS.create()
                 // Ищем все сервисы типа "_arduino._tcp.local."
                 jmDNS.addServiceListener("anime._tcp.local.", object : ServiceListener {

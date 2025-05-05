@@ -1,4 +1,6 @@
 import android.util.Log
+import com.limbuserendipity.smartcircle.domain.server.AppServer
+import com.limbuserendipity.smartcircle.domain.server.AppServerCallback
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -19,20 +21,13 @@ import java.util.concurrent.ConcurrentHashMap
 class WebSocketServer(
     private val port: Int = 8080,
     private val pingInterval: Duration = Duration.ofSeconds(15),
-    private val timeoutDuration: Duration = Duration.ofSeconds(30)
-) {
+    private val timeoutDuration: Duration = Duration.ofSeconds(30),
+    override var callback: AppServerCallback
+) : AppServer{
     private var server: ApplicationEngine? = null
     private val sessions = ConcurrentHashMap<String, WebSocketSession>()
 
-    // Callbacks для событий сервера
-    var onServerStarted: (() -> Unit)? = null
-    var onServerStopped: (() -> Unit)? = null
-    var onClientConnected: ((ip: String) -> Unit)? = null
-    var onClientDisconnected: ((ip: String) -> Unit)? = null
-    var onMessageReceived: ((ip: String, message: String) -> Unit)? = null
-    var onError: ((Throwable) -> Unit)? = null
-
-    fun start() {
+    override fun start() {
         try {
             server = embeddedServer(Netty, port = port) {
                 install(WebSockets) {
@@ -56,7 +51,7 @@ class WebSocketServer(
                 }
             }.start(wait = false)
 
-            onServerStarted?.invoke()
+            callback.onServerStarted()
         } catch (e: Exception) {
             handleError(e, "Failed to start WebSocket server")
         }
@@ -67,7 +62,7 @@ class WebSocketServer(
             when (frame) {
                 is Frame.Text -> {
                     val text = frame.readText()
-                    onMessageReceived?.invoke(ip, text)
+                    callback.onMessageReceived(ip, text)
                 }
                 is Frame.Ping -> continue // Игнорируем ping-фреймы
                 is Frame.Pong -> continue // Игнорируем pong-фреймы
@@ -78,30 +73,30 @@ class WebSocketServer(
 
     private fun WebSocketSession.registerSession(ip: String) {
         sessions[ip] = this
-        onClientConnected?.invoke(ip)
+        callback.onClientConnected(ip)
     }
 
     private fun unregisterSession(ip: String) {
         sessions.remove(ip)
-        onClientDisconnected?.invoke(ip)
+        callback.onClientDisconnected(ip)
     }
 
     private fun handleError(exception: Throwable, context: String = "") {
         Log.e("WebSocketError", "$context: ${exception.message}")
-        onError?.invoke(exception)
+        callback.onError.invoke(exception)
     }
 
-    fun stop() {
+    override fun stop() {
         try {
             server?.stop(1000, 3000)
             sessions.clear()
-            onServerStopped?.invoke()
+            callback.onServerStopped.invoke()
         } catch (e: Exception) {
             handleError(e, "Error while stopping server")
         }
     }
 
-    suspend fun broadcastMessage(message: String) {
+    override suspend fun broadcastMessage(message: String) {
         sessions.forEach { (ip, session) ->
             try {
                 session.send(Frame.Text(message))
@@ -112,7 +107,7 @@ class WebSocketServer(
         }
     }
 
-    suspend fun sendToClient(ip: String, message: String): Boolean {
+    override suspend fun sendToClient(ip: String, message: String): Boolean {
         return sessions[ip]?.let { session ->
             try {
                 session.send(Frame.Text(message))
