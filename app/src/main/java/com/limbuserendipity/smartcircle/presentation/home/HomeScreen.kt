@@ -7,17 +7,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.limbuserendipity.smartcircle.data.core.model.Arduino
-import com.limbuserendipity.smartcircle.data.core.model.ArduinoStatus
+import com.limbuserendipity.smartcircle.data.core.Action
+import com.limbuserendipity.smartcircle.data.core.model.Client
 import com.limbuserendipity.smartcircle.presentation.component.ClientCard
 
 @Composable
@@ -26,39 +24,40 @@ fun HomeScreen(
 ){
 
     val state by viewModel.state.collectAsState()
-    SearchContent(
+    HomeContent(
         status = state.serverStatus,
-        clients = state.arduinos,
+        clients = state.clients,
         onLightClick = { client ->
-            viewModel.sendToClient(client.ip, "light")
+            viewModel.sendToClient(client.ip, Action.blink.request())
+        },
+        onDetailsClick = { id ->
+            viewModel.toDetailsClient(id)
         }
     )
-
-    LaunchedEffect(Unit) {
-        viewModel.startServer()
-    }
 
 }
 
 
 @Composable
-fun SearchContent(
+fun HomeContent(
     status : ServerStatus,
-    clients : List<Arduino>,
-    onLightClick : (Arduino) -> Unit
+    clients : List<Client>,
+    onLightClick : (Client) -> Unit,
+    onDetailsClick : (String) -> Unit
 ){
 
     val statusText = when(status){
         ServerStatus.Running -> "Running"
         ServerStatus.Stopped -> "Stopped"
         is ServerStatus.Error -> "error: ${status.message}"
+        else -> {""}
     }
 
     LazyColumn(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(8.dp)
             .fillMaxSize()
-            .padding(32.dp)
+            .padding(8.dp)
     ) {
 
         item {
@@ -72,11 +71,10 @@ fun SearchContent(
         itemsIndexed(clients){ index, client ->
             ClientCard(
                 number = index.toString(),
-                ip = client.ip,
-                time = client.time,
-                massage = client.massage,
-                isConnect = client.status == ArduinoStatus.Connected,
-                onLightClick = { onLightClick(client) }
+                id = client.id,
+                isConnect = true, //client.status == ArduinoStatus.Connected,
+                onLightClick = { onLightClick(client) },
+                onDetailsClick = { onDetailsClick(client.id) }
             )
         }
     }

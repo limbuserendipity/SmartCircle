@@ -6,8 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.limbuserendipity.smartcircle.presentation.home.HomeScreen
-import com.limbuserendipity.smartcircle.presentation.lang_details.ProgrammingLanguageDetailsScreen
-import com.limbuserendipity.smartcircle.presentation.lang_details.ProgrammingLanguageDetailsViewModel
+import com.limbuserendipity.smartcircle.presentation.client_details.ClientDetailsScreen
+import com.limbuserendipity.smartcircle.presentation.client_details.ClientDetailsViewModel
 import com.limbuserendipity.smartcircle.presentation.langs.ProgrammingLanguagesScreen
 import com.limbuserendipity.smartcircle.presentation.langs.ProgrammingLanguagesViewModel
 
@@ -28,8 +28,8 @@ fun AppNavHost(
             ProgrammingLanguagesScreen(hiltViewModel<ProgrammingLanguagesViewModel>())
         }
 
-        composable<Screen.ProgrammingLanguageDetails> {
-            ProgrammingLanguageDetailsScreen(hiltViewModel<ProgrammingLanguageDetailsViewModel>())
+        composable<Screen.ClientDetails> {
+            ClientDetailsScreen(hiltViewModel<ClientDetailsViewModel>())
         }
     }
 }

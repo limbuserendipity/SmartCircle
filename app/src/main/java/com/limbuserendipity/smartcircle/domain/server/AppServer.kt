@@ -11,8 +11,6 @@ interface AppServer {
 }
 
 data class AppServerCallback(
-    var onServerStarted: (() -> Unit),
-    var onServerStopped: (() -> Unit),
     var onClientConnected: ((ip: String) -> Unit),
     var onClientDisconnected: ((ip: String) -> Unit),
     var onMessageReceived: ((ip: String, message: String) -> Unit),

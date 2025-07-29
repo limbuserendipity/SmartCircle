@@ -1,4 +1,4 @@
-package com.limbuserendipity.smartcircle.presentation.lang_details
+package com.limbuserendipity.smartcircle.presentation.client_details
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,74 +23,71 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.limbuserendipity.smartcircle.data.core.Action
+import com.limbuserendipity.smartcircle.data.core.model.Client
+import com.limbuserendipity.smartcircle.presentation.component.Circle
+import com.limbuserendipity.smartcircle.presentation.component.Space
 import limbuserendipity.smartcircle.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProgrammingLanguageDetailsScreen(programmingLanguageDetailsViewModel: ProgrammingLanguageDetailsViewModel) {
+fun ClientDetailsScreen(viewModel: ClientDetailsViewModel) {
 
-    val programmingLanguageDetailsViewState =
-        programmingLanguageDetailsViewModel.programmingLanguageDetailsViewState.collectAsStateWithLifecycle().value
+    val state =
+        viewModel.state.collectAsStateWithLifecycle().value
+
+    val client = state.client
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(programmingLanguageDetailsViewState.langName)
+                    Text(client.id)
                 },
                 navigationIcon = {
-                    IconButton(onClick = { programmingLanguageDetailsViewModel.backClicked() }) {
+                    IconButton(onClick = { viewModel.backClicked() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
                 }
             )
         }) { innerPadding ->
-        Content(
-            programmingLanguageDetailsViewState,
+        ClientDetailsContent(
+            state.client,
             innerPadding
         )
     }
 }
 
 @Composable
-private fun Content(
-    programmingLanguageDetailsViewState: ProgrammingLanguageDetailsViewState,
+private fun ClientDetailsContent(
+    client : Client,
     innerPadding: PaddingValues
 ) {
     Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
     ) {
-        if (programmingLanguageDetailsViewState.isLoading) {
-            LoadingContent()
-        } else {
-            LoadedContent(programmingLanguageDetailsViewState.programmingLanguageDetails.description)
+
+        Circle(
+            isConnect = true
+        ) {
+
         }
+
+        24.dp.Space()
+
+        client.messages.forEach { message ->
+
+            val text = if(message.type == Action.time) formatUnixTime(message.text.toLong()) else message.value
+
+            Text(
+                text = text
+            )
+        }
+
+
     }
 }
-
-@Composable
-private fun LoadingContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Preview
-@Composable
-private fun LoadedContent(description: String = stringResource(R.string.app_name)) {
-    Column(
-        modifier = Modifier
-            .padding(8.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Text(description)
-    }
-}
-

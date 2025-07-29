@@ -8,7 +8,7 @@ sealed class Screen {
     data object ProgrammingLanguages : Screen()
 
     @Serializable
-    data class ProgrammingLanguageDetails(val name: String) : Screen()
+    data class ClientDetails(val id: String) : Screen()
 
     @Serializable
     data object HomeScreen : Screen()

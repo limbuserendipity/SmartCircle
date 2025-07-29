@@ -29,7 +29,7 @@ class ProgrammingLanguagesViewModel @Inject constructor(
     }
 
     fun detailsClicked(name: String) {
-        appNavigator.navigateTo(Screen.ProgrammingLanguageDetails(name))
+        appNavigator.navigateTo(Screen.ClientDetails(name))
     }
 
     private fun getProgrammingLanguages() {
